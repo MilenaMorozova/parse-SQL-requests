@@ -11,6 +11,11 @@ time_ms = [float(i[1:-3]) for i in time]
 
 requests = re.split("\[\d*\.\d*ms\]", data)
 result = [[time, request.strip()] for time, request in zip(time_ms, requests)]
+
+with open('unsort_'+file_name, 'w') as file_with_unsorted_logs:
+    for item in result:
+        file_with_unsorted_logs.write("[" + str(item[0]) + "ms] : \n" + item[1] + "\n\n")
+
 sorted_result = sorted(result, reverse=True, key=lambda x: x[0])
 
 with open('sort_'+file_name, 'w') as file_with_sorted_logs:
