@@ -44,7 +44,22 @@ def group_logs_by(data: list, sort_by=True, reverse=True):
         for key in first_string_of_logs:
             first_string_of_logs[key] = sorted(first_string_of_logs[key], reverse=reverse, key=lambda x: x[0])
 
-    return list(first_string_of_logs.values())
+    result_with_counter = []
+    c = 0
+    for key in first_string_of_logs:
+        group = first_string_of_logs[key]
+        time_in_group = [i[0] for i in group]
+
+        temp = []
+        i = 0
+        while i < len(time_in_group):
+            number_of_item = time_in_group.count(time_in_group[i])
+            temp.append((number_of_item, group[i]))
+            i += number_of_item
+
+        result_with_counter.append(temp)
+
+    return result_with_counter
 
 
 def write_to_file(data, file_name, options):
@@ -59,19 +74,29 @@ def write_to_file(data, file_name, options):
             output_file.write("[" + str(item[0]) + "ms] : \n" + item[1] + "\n\n")
 
 
+def calc_len_of_group(group: list):
+    return sum([i[0] for i in group])
+
+
+def calc_time_in_group(group: list):
+    return sum([i[0] * i[1][0] for i in group])
+
+
 def write_to_file_grouped_data(grouped_data, file_name, options):
     with open(file_name, 'w') as output_file:
         if options.group:
             for group in grouped_data:
                 if options.counter:
-                    output_file.write("Total requests in group: " + str(len(group)) + '\n\n')
+                    output_file.write("Total requests in group: " + str(calc_len_of_group(group)) + '\n\n')
 
                 if options.time:
-                    output_file.write("Total time: " + str(calc_total_time(group))+'\n\n')
+                    output_file.write("Total time: " + str(calc_time_in_group(group)) + '\n\n')
 
                 for item in group:
-                    output_file.write("[" + str(item[0]) + "ms] : \n" + item[1] + "\n\n")
-                output_file.write('-'*125+'\n\n')
+                    output_file.write("[" + str(item[1][0]) + "ms] " + ("" if item[0] == 1 else "X "+str(item[0])) +
+                                      ": \n" + item[1][1] + "\n\n")
+
+                output_file.write('-' * 125 + '\n\n')
 
 
 if __name__ == '__main__':
