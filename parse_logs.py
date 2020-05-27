@@ -1,5 +1,6 @@
 import re
 from optparse import OptionParser
+import os
 
 
 def create_options_for_option_parser(option_parser: OptionParser):
@@ -45,7 +46,7 @@ def group_logs_by(data: list, sort_by=True, reverse=True):
             first_string_of_logs[key] = sorted(first_string_of_logs[key], reverse=reverse, key=lambda x: x[0])
 
     result_with_counter = []
-    c = 0
+
     for key in first_string_of_logs:
         group = first_string_of_logs[key]
         time_in_group = [i[0] for i in group]
@@ -102,16 +103,17 @@ def write_to_file_grouped_data(grouped_data, file_name, options):
 if __name__ == '__main__':
     parser = OptionParser()
     create_options_for_option_parser(parser)
-
     options, args = parser.parse_args()
-    name_of_original_file = args[0]
 
-    data = read_data_from_file(name_of_original_file)
+    path_to_input_file = os.path.dirname(args[0])
+    name_of_original_file = os.path.basename(args[0])
 
-    write_to_file(data, 'unsort_'+name_of_original_file, options)
+    data = read_data_from_file(args[0])
+
+    write_to_file(data, os.path.join(path_to_input_file, 'unsort_'+name_of_original_file), options)
 
     sorted_data = sort_logs(data, True)
-    write_to_file(sorted_data, 'sort_'+name_of_original_file, options)
+    write_to_file(sorted_data, os.path.join(path_to_input_file, 'sort_'+name_of_original_file), options)
 
     data_grouped = group_logs_by(data)
-    write_to_file_grouped_data(data_grouped, 'grouped_'+name_of_original_file, options)
+    write_to_file_grouped_data(data_grouped, os.path.join(path_to_input_file, 'grouped_'+name_of_original_file), options)
